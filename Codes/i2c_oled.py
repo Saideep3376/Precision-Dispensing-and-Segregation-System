@@ -1,9 +1,10 @@
+```python
 from machine import I2C, Pin
 
-# I2C channel 0 and pins 12 (SDA) and 13 (SCL) for the OLED display
+# Initialize I2C on channel 0 using pins 12 (SDA) and 13 (SCL) for the OLED display
 oled_i2c = I2C(0, scl=Pin(13), sda=Pin(12))
 
-# Define the Display Configiration Commands
+# OLED display configuration commands
 SET_CONTRAST_LVL = const(0x81)
 DISPLAY_ALL_PIXELS = const(0xa4)
 DISPLAY_NORMAL = const(0xa6)
@@ -22,55 +23,55 @@ SET_PRECHARGE_PERIOD = const(0xd9)
 SET_VCOM_DESELECT = const(0xdb)
 ENABLE_CHARGE_PUMP = const(0x8d)
 
-# Define the Screen Dimensions
+# OLED screen dimensions
 OLED_WIDTH = 128
 OLED_HEIGHT = 64
 
-# Define the Screen Address
-I2C_ADDR = 0x3C #I2C Address is found by running the code in file 'oled_address.py'
+# I2C address for the OLED screen, obtained by running 'oled_address.py'
+I2C_ADDR = 0x3C
 
-# Display buffer (1byte for each 8 vertical pixels)
+# Display buffer to store pixel data, each byte represents 8 vertical pixels
 display_buffer = bytearray((OLED_HEIGHT // 8) * OLED_WIDTH)
 
-# Function to send command to the OLED screen
+# Send a command to the OLED screen
 def send_command(cmd):
     temp_buf = bytearray([0x80, cmd]) 
     oled_i2c.writeto(I2C_ADDR, temp_buf)
 
-# Function to send data to OLED Screen
+# Send data to the OLED screen
 def send_data(data):
     temp_buf = bytearray([0x40, data]) 
     oled_i2c.writeto(I2C_ADDR, temp_buf)
 
-# Initialize OLED settings
+# Initialize the OLED display with a sequence of commands
 def initialize_oled():
     init_sequence = [
         TURN_DISPLAY | 0x00,  # Turn off display
-        SET_ADDR_MODE, 0x00,  # Horizontal address mode
+        SET_ADDR_MODE, 0x00,  # Set to horizontal address mode
         START_LINE_POS | 0x00,
-        SET_REMAP | 0x01,  # Column address remap
+        SET_REMAP | 0x01,  # Set column address remap
         SET_MUX, OLED_HEIGHT - 1,
-        SET_COM_DIRECTION | 0x08,  # COM[N] to COM0 scan
+        SET_COM_DIRECTION | 0x08,  # Set COM[N] to COM0 scan direction
         DISPLAY_OFFSET, 0x00,
         COM_PIN_CONFIG, 0x12,
         SET_CLK_DIV_RATIO, 0x80,
         SET_PRECHARGE_PERIOD, 0xf1,
-        SET_VCOM_DESELECT, 0x30,  # Deselect level
-        SET_CONTRAST_LVL, 0xff,  # Max contrast
+        SET_VCOM_DESELECT, 0x30,  # Set deselect level
+        SET_CONTRAST_LVL, 0xff,  # Set maximum contrast
         DISPLAY_ALL_PIXELS,  # Display RAM content
-        DISPLAY_NORMAL,  # Normal display mode
+        DISPLAY_NORMAL,  # Set display to normal mode
         ENABLE_CHARGE_PUMP, 0x14,  # Enable charge pump
         TURN_DISPLAY | 0x01  # Turn on display
     ]
     for cmd in init_sequence:
         send_command(cmd)
 
-# Fucntion to clear the display buffer
+# Clear the display buffer by setting all bytes to 0
 def clear_buffer():
     for i in range(len(display_buffer)):
         display_buffer[i] = 0x00
 
-# Function to set a single pixel in the buffer
+# Set a single pixel in the display buffer
 def set_pixel_in_buffer(x, y, color):
     if y >= OLED_HEIGHT or x < 0 or y < 0:
         return
@@ -84,9 +85,9 @@ def set_pixel_in_buffer(x, y, color):
     else:
         display_buffer[buffer_index] &= ~(1 << bit_pos)
 
-# Function to draws characters, alphabets, numbers (simple 5x8 font)
+# Render a character at position (x, y) using a simple 5x8 font
 def render_character(x, y, char):
-    # mapping Symbols with the pixels 
+    # Map character symbols to pixel data
     font_map = {
     'A': [0x7C, 0x12, 0x12, 0x12, 0x7C],
     'B': [0x7E, 0x4A, 0x4A, 0x4A, 0x34],
@@ -146,14 +147,14 @@ def render_character(x, y, char):
             for j in range(8):
                 set_pixel_in_buffer(x + i, y + j, (byte_data >> j) & 1)
 
-# Function to write text to the display buffer
+# Write a string of text to the display buffer
 def write_text_to_buffer(text):
     x_position = 0
     for char in text:
         render_character(x_position, 0, char)
-        x_position += 6  # Move to next character position
+        x_position += 6  # Move to the next character position
 
-# Function to update the OLED with buffer content
+# Update the OLED display with the contents of the display buffer
 def display_on_oled():
     send_command(SET_COL_RANGE)
     send_command(0)
@@ -163,8 +164,4 @@ def display_on_oled():
     send_command((OLED_HEIGHT // 8) - 1)
     for i in range(len(display_buffer)):
         send_data(display_buffer[i])
-
-
-
-
-
+```
