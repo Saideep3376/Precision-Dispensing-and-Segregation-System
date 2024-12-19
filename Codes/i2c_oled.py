@@ -1,4 +1,3 @@
-```python
 from machine import I2C, Pin
 
 # Initialize I2C on channel 0 using pins 12 (SDA) and 13 (SCL) for the OLED display
