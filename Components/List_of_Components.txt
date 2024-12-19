@@ -1,0 +1,8 @@
+The Components used for the functionality of the Precision Dispensing and Segregation System
+
+--> Perilstaltic Pump (12V)
+--> Load Cell
+--> HX711 Amplifier Board
+--> MG90 Serovs
+--> Nema 17 Stepper Motor
+--> I2C OLED Display
